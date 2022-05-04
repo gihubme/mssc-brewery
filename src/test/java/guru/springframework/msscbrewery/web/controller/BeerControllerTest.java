@@ -100,16 +100,14 @@ class BeerControllerTest {
         then(service).should().updateBeer(any(), any());
     }
 
-    @DisplayName("PUT /beerById noContent")
+    @DisplayName("DELETE /beerById noContent")
     @Test
     void deleteBeer() throws Exception {
         //given
         BeerDto beerDto = validBeer;
         String dtoJson = objectMapper.writeValueAsString(beerDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/beer/" + validBeer.getId().toString())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(dtoJson))
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/beer/" + validBeer.getId().toString()))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         then(service).should().deleteById(any());
