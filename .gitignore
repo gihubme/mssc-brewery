@@ -69,6 +69,10 @@ local.properties
 ######################
 /log/
 */target/**
+
+# anywhere target or log directories with entire contents
+**/target/
+**/log/
 ######################
 # Gradle
 ######################
