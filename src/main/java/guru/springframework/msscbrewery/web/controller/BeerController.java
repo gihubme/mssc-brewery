@@ -42,6 +42,24 @@ public class BeerController {
         return new ResponseEntity(headers, HttpStatus.CREATED);
     }
 
+    @PostMapping("/full")
+    public ResponseEntity<?> handlePost2(@RequestBody BeerDto beerDto,
+                                         @RequestParam(defaultValue = "0", value = "fullResponse", required = false)
+                                                 String fullResponse) {
+
+        BeerDto savedDto = beerService.saveNewBeer(beerDto);
+
+        HttpHeaders headers = new HttpHeaders();
+        //todo add hostname to url
+        headers.add("Location", "/api/v1/beer/" + savedDto.getId().toString());
+
+        if (fullResponse.equals("0")) {
+            return new ResponseEntity<>("New Beer was saved", headers, HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>(savedDto, headers, HttpStatus.CREATED);
+        }
+    }
+
     @PostMapping(
             path = "/form",
             consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})

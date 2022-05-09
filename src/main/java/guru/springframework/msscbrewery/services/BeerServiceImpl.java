@@ -30,6 +30,8 @@ public class BeerServiceImpl implements BeerService {
     public BeerDto saveNewBeer(BeerDto beerDto) {
         return BeerDto.builder()
                 .id(UUID.randomUUID())
+                .beerName(beerDto.getBeerName())
+                .beerStyle(beerDto.getBeerStyle())
                 .build();
     }
 
@@ -55,9 +57,9 @@ public class BeerServiceImpl implements BeerService {
         paramMap.entrySet().stream()
                 .forEach(e -> {
                     if (!e.getValue().get(0).isBlank()) {
-                        if (e.equals("id")) bmap.put("id", e.getValue().get(0));
-                        if (e.equals("beerName")) bmap.put("beerName", e.getValue().get(0));
-                        if (e.equals("upc")) bmap.put("upc", e.getValue().get(0));
+                        if (e.getKey().equals("id")) bmap.put("id", e.getValue().get(0));
+                        if (e.getKey().equals("beerName")) bmap.put("beerName", e.getValue().get(0));
+                        if (e.getKey().equals("upc")) bmap.put("upc", e.getValue().get(0));
                     }
                 });
 
@@ -66,6 +68,7 @@ public class BeerServiceImpl implements BeerService {
         // Deserialization into the `Employee` class
         BeerDto dto = objectMapper.readValue(json, BeerDto.class);
 
+        log.debug("\nparmMap: " + paramMap + "\nbmap: " + bmap + "\nresponse: " + json);
         return dto;
     }
 }

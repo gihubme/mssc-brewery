@@ -89,7 +89,29 @@ class BeerControllerTest {
         log.info(dtoJson);
     }
 
-    @DisplayName("POST /beer/form created")
+    @DisplayName("POST2 /beer/full created")
+    @Test
+    void handlePost2() throws Exception {
+        //given
+        BeerDto beerDto = validBeer;
+        beerDto.setId(null);
+        BeerDto savedDto = BeerDto.builder().id(UUID.randomUUID()).beerName("New Beer").build();
+        String dtoJson = objectMapper.writeValueAsString(beerDto);
+
+        given(service.saveNewBeer(any())).willReturn(savedDto);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/beer/full?fullResponse=1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(dtoJson))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id", is(savedDto.getId().toString())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.beerName", is("New Beer")));
+
+        log.info(dtoJson);
+    }
+
+    @DisplayName("POST3 /beer/form created")
     @Test
     void handleUrlEncodedPost() throws Exception {
         //given
