@@ -15,7 +15,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
@@ -83,6 +87,47 @@ class BeerControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isCreated());
 
         log.info(dtoJson);
+    }
+
+    @DisplayName("POST /beer/form created")
+    @Test
+    void handleUrlEncodedPost() throws Exception {
+        //given
+        MultiValueMap<String, String> paramMap = new LinkedMultiValueMap<>();
+        paramMap.add("id", UUID.randomUUID().toString());
+        paramMap.add("beerName", "tasty Beer");
+        paramMap.add("upc", Long.toString(56382L));
+
+        Map<String, String> bmap = new HashMap<>();
+        paramMap.entrySet().stream()
+                .forEach(e -> {
+                    if (!e.getValue().get(0).isBlank()) {
+                        if (e.getKey().equals("id")) bmap.put("id", e.getValue().get(0));
+                        if (e.getKey().equals("beerName")) bmap.put("beerName", e.getValue().get(0));
+                        if (e.getKey().equals("upc")) bmap.put("upc", e.getValue().get(0));
+                    }
+                });
+
+        String json = objectMapper.writeValueAsString(bmap);
+        log.info("json: " + json);
+        // Deserialization into the `Employee` class
+        BeerDto dto = objectMapper.readValue(json, BeerDto.class);//.readValue(json, BeerDto.class);
+
+        given(service.saveNewBeerDtoViaForm(any())).willReturn(dto);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/beer/form")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                        .param("id", bmap.get("id"))
+                        .param("beerName", bmap.get("beerName"))
+                        .param("upc", bmap.get("upc")))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.content()
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)) //MediaType.valueOf("text/plain;charset=UTF-8")
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id", is(bmap.get("id"))))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.beerName", is("tasty Beer")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.upc", is(56382)));
+
+        log.info("dto: " + dto + "\njson: " + json);
     }
 
     @DisplayName("PUT /beerById noContent")

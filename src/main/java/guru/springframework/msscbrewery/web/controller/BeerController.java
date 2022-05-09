@@ -4,7 +4,9 @@ import guru.springframework.msscbrewery.services.BeerService;
 import guru.springframework.msscbrewery.web.model.BeerDto;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -38,6 +40,15 @@ public class BeerController {
         headers.add("Location", "/api/v1/beer/" + savedDto.getId().toString());
 
         return new ResponseEntity(headers, HttpStatus.CREATED);
+    }
+
+    @PostMapping(
+            path = "/form",
+            consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+    public ResponseEntity<BeerDto> handleUrlEncodedPost(
+            @RequestParam MultiValueMap<String, String> paramMap) throws Exception {
+        BeerDto savedBeer = beerService.saveNewBeerDtoViaForm(paramMap);
+        return new ResponseEntity<>(savedBeer, HttpStatus.CREATED);
     }
 
     @PutMapping({"/{beerId}"})
