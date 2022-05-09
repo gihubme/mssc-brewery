@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 /**
@@ -31,7 +32,7 @@ public class BeerController {
     }
 
     @PostMapping
-    public ResponseEntity handlePost(@RequestBody BeerDto beerDto) {
+    public ResponseEntity handlePost(@Valid @RequestBody BeerDto beerDto) {
 
         BeerDto savedDto = beerService.saveNewBeer(beerDto);
 
@@ -43,7 +44,7 @@ public class BeerController {
     }
 
     @PostMapping("/full")
-    public ResponseEntity<?> handlePost2(@RequestBody BeerDto beerDto,
+    public ResponseEntity<?> handlePost2(@Valid @RequestBody BeerDto beerDto,
                                          @RequestParam(defaultValue = "0", value = "fullResponse", required = false)
                                                  String fullResponse) {
 
@@ -70,7 +71,7 @@ public class BeerController {
     }
 
     @PutMapping({"/{beerId}"})
-    public ResponseEntity handlePut(@PathVariable("beerId") UUID beerId, @RequestBody BeerDto beerDto) {
+    public ResponseEntity handlePut(@PathVariable("beerId") UUID beerId, @Valid @RequestBody BeerDto beerDto) {
         BeerDto savedDto = beerService.updateBeer(beerId, beerDto);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }

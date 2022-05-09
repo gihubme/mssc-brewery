@@ -157,9 +157,10 @@ class BeerControllerTest {
     void handlePut() throws Exception {
         //given
         BeerDto beerDto = validBeer;
+        beerDto.setId(null);
         String dtoJson = objectMapper.writeValueAsString(beerDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/beer/" + validBeer.getId().toString())
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/beer/" + UUID.randomUUID().toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(dtoJson))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
@@ -174,7 +175,7 @@ class BeerControllerTest {
         BeerDto beerDto = validBeer;
         String dtoJson = objectMapper.writeValueAsString(beerDto);
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/beer/" + validBeer.getId().toString()))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/beer/" + validBeer.getId().toString()))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         then(service).should().deleteById(any());
