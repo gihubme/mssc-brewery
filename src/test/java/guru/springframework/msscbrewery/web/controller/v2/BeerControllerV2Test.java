@@ -5,6 +5,7 @@ import guru.springframework.msscbrewery.services.V2.BeerServiceV2;
 import guru.springframework.msscbrewery.web.model.v2.BeerDtoV2;
 import guru.springframework.msscbrewery.web.model.v2.BeerStyleEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import javax.validation.ConstraintViolation;
@@ -192,7 +194,7 @@ class BeerControllerV2Test {
                 .beerName(" ")
                 .beerStyleStr("Pineapple")
                 .upc(-123L)
-                .beerStyle(null)
+//                .beerStyle(null)//as null >> "null", it throws a different Exeption: HttpMessageNotReadableException
                 .build();
 
         Set<ConstraintViolation<BeerDtoV2>> violations = validator.validate(dto);
@@ -202,15 +204,38 @@ class BeerControllerV2Test {
             errors.add(constraintViolation.getPropertyPath() + " : " + constraintViolation.getMessage());
         });
 
-        String dtoJson = objectMapper.writeValueAsString(errors);
+        String dtoJson = objectMapper.writeValueAsString(dto);
+        String className = BeerStyleEnum.class.getCanonicalName().toString();
 
         ConstraintViolationException e = new ConstraintViolationException(violations);
         given(service.saveNewBeer(dto)).willThrow(e);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v2/beer/")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
                         .content(dtoJson))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_UTF8))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.errors").isArray())
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.errors", Matchers.hasSize(5)))
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.errors", Matchers.hasItem("must not be null"))) //beerStyle
+
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.*", Matchers.hasSize(5)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[*]",
+                        Matchers.hasItem("NotNull.beerDtoV2.beerStyle : must not be null")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[*]",
+                        Matchers.hasItem("NotBlank.beerDtoV2.beerName : must not be blank")))
+
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(Matchers.containsString(
+                                "ValueOfEnum.beerDtoV2.beerStyleStr : must be any of enum class " + className)))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(Matchers.containsString("Positive.beerDtoV2.upc : must be greater than 0")))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(Matchers.containsString("Null.beerDtoV2.id : must be null")))
+        ;
 
         log.info("errorsJson: " + dtoJson);
 
