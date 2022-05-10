@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 @RestController
@@ -25,7 +26,7 @@ public class CustomerController {
     }
 
     @PostMapping
-    public ResponseEntity handlePost(@RequestBody CustomerDto dto) {
+    public ResponseEntity handlePost(@Valid @RequestBody CustomerDto dto) {
         CustomerDto savedDto = customerService.saveNewCustomer(dto);
         HttpHeaders headers = new HttpHeaders();
         //todo add hostname to url
@@ -35,7 +36,7 @@ public class CustomerController {
     }
 
     @PutMapping("/{customerId}")
-    public ResponseEntity handlePut(@PathVariable("customerId") UUID id, @RequestBody CustomerDto dto) {
+    public ResponseEntity handlePut(@PathVariable("customerId") UUID id, @Valid @RequestBody CustomerDto dto) {
         CustomerDto savedDto = customerService.handlePut(id, dto);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
@@ -45,4 +46,5 @@ public class CustomerController {
     public void deleteBeer(@PathVariable("customerId") UUID id) {
         customerService.deleteById(id);
     }
+
 }
