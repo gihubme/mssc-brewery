@@ -6,16 +6,19 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+@Validated
 @RequestMapping("/api/v2/beer")
 @RestController
 public class BeerControllerV2 {
@@ -27,13 +30,13 @@ public class BeerControllerV2 {
     }
 
     @GetMapping({"/{beerId}"})
-    public ResponseEntity<BeerDtoV2> getBeer(@PathVariable("beerId") UUID beerId) {
+    public ResponseEntity<BeerDtoV2> getBeer(@NotNull @PathVariable("beerId") UUID beerId) {
 
         return new ResponseEntity<>(beerService.getBeerById(beerId), HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity handlePost(@Valid @RequestBody BeerDtoV2 beerDto) {
+    public ResponseEntity handlePost(@NotNull @Valid @RequestBody BeerDtoV2 beerDto) {
 
         BeerDtoV2 savedDto = beerService.saveNewBeer(beerDto);
 
@@ -45,14 +48,15 @@ public class BeerControllerV2 {
     }
 
     @PutMapping({"/{beerId}"})
-    public ResponseEntity handlePut(@PathVariable("beerId") UUID beerId, @Valid @RequestBody BeerDtoV2 beerDto) {
+    public ResponseEntity handlePut(@NotNull @PathVariable("beerId") UUID beerId,
+                                    @NotNull @Valid @RequestBody BeerDtoV2 beerDto) {
         BeerDtoV2 savedDto = beerService.updateBeer(beerId, beerDto);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{beerId}")
-    public void deleteBeer(@PathVariable("beerId") UUID id) {
+    public void deleteBeer(@NotNull @PathVariable("beerId") UUID id) {
         beerService.deleteById(id);
     }
 
@@ -65,7 +69,7 @@ public class BeerControllerV2 {
                 errors.add(constraintViolation.getPropertyPath() + " : " + constraintViolation.getMessage());
             });
             return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-        } else if (e instanceof ConstraintViolationException) {
+        } else if (e instanceof MethodArgumentNotValidException) {
             MethodArgumentNotValidException nve = (MethodArgumentNotValidException) e;
             List<String> errors = new ArrayList<>(nve.getBindingResult().getAllErrors().size());
             nve.getBindingResult().getAllErrors().forEach(objectErr -> {
