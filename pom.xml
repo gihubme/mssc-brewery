@@ -47,12 +47,6 @@
             <optional>true</optional>
             <version>${org.lombok.version}</version>
         </dependency>
-        <!-- This is needed when using Lombok 1.18.16 and above -->
-        <!--<dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok-mapstruct-binding</artifactId>
-            <version>0.2.0</version>
-        </dependency>-->
 
         <dependency>
             <groupId>org.mapstruct</groupId>
@@ -82,7 +76,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.9.0</version>
+                <version>3.8.0</version>
                 <configuration>
                     <annotationProcessorPaths>
                         <path>
@@ -105,6 +99,7 @@
                         </path>
                     </annotationProcessorPaths>
                     <compilerArgs>
+
                         <compileArg>-Amapstruct.defaultComponentModel=spring</compileArg>
                     </compilerArgs>
                 </configuration>
